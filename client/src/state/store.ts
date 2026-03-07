@@ -3,6 +3,7 @@ type Listener = () => void;
 interface AppState {
   authenticated: boolean;
   username: string;
+  instanceName: string;
   currentRoute: string;
   sidebarCollapsed: boolean;
   mobileSidebarOpen: boolean;
@@ -19,6 +20,7 @@ interface AppState {
 const state: AppState = {
   authenticated: false,
   username: '',
+  instanceName: 'PiGuard',
   currentRoute: 'dashboard',
   sidebarCollapsed: false,
   mobileSidebarOpen: false,

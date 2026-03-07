@@ -4,7 +4,7 @@ import { loginRepo, apiKeysRepo } from '../database/repositories.js';
 import { loginLimiter } from '../middleware/rate-limit.js';
 import { getLogger } from '../logger.js';
 import { ensureCsrfToken } from '../middleware/security.js';
-import { completeInitialSetup, getSetupStatus, isSetupComplete } from '../services/setup.service.js';
+import { completeInitialSetup, getSetupStatus, isSetupComplete, getInstanceName } from '../services/setup.service.js';
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.post('/setup', async (req: Request, res: Response) => {
     return;
   }
 
-  const { username, password, language, healthChecks, notifications } = req.body ?? {};
+  const { username, password, language, instanceName, healthChecks, notifications } = req.body ?? {};
 
   if (!username || typeof username !== 'string' || username.trim().length < 3) {
     res.status(400).json({ success: false, error: 'username must be at least 3 characters' });
@@ -66,6 +66,7 @@ router.post('/setup', async (req: Request, res: Response) => {
     username,
     password,
     language,
+    instanceName: typeof instanceName === 'string' ? instanceName : undefined,
     healthChecks: sanitizedChecks as any,
     notifications: {
       ntfyUrl: typeof notifications?.ntfyUrl === 'string' ? notifications.ntfyUrl : '',
@@ -138,7 +139,7 @@ router.get('/me', (req: Request, res: Response) => {
     res.status(401).json({ success: false, error: 'Not authenticated' });
     return;
   }
-  res.json({ success: true, data: { username: user.sub } });
+  res.json({ success: true, data: { username: user.sub, instanceName: getInstanceName() } });
 });
 
 router.post('/api-keys', (req: Request, res: Response) => {

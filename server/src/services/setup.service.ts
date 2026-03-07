@@ -16,6 +16,7 @@ export interface SetupInput {
   username: string;
   password: string;
   language: 'fr' | 'en';
+  instanceName?: string;
   healthChecks: SetupHealthCheckInput[];
   notifications?: {
     ntfyUrl?: string;
@@ -28,6 +29,7 @@ export interface SetupInput {
 
 const SETUP_KEY = 'app.setup_complete';
 const LANGUAGE_KEY = 'app.language';
+const INSTANCE_NAME_KEY = 'app.instance_name';
 const ADMIN_USERNAME_KEY = 'auth.admin_username';
 const ADMIN_PASSWORD_HASH_KEY = 'auth.admin_password_hash';
 const ADMIN_SOURCE_KEY = 'auth.source';
@@ -47,6 +49,31 @@ export function isSetupComplete() {
 
 export function getAppLanguage() {
   return settingsRepo.get(LANGUAGE_KEY, 'fr') === 'en' ? 'en' : 'fr';
+}
+
+export function getInstanceName() {
+  return settingsRepo.get(INSTANCE_NAME_KEY, 'PiGuard');
+}
+
+export function setInstanceName(name: string) {
+  settingsRepo.set(INSTANCE_NAME_KEY, name.trim() || 'PiGuard');
+}
+
+export function setAppLanguage(language: string) {
+  settingsRepo.set(LANGUAGE_KEY, language === 'en' ? 'en' : 'fr');
+}
+
+export async function changeAdminPassword(newPassword: string) {
+  const newHash = await hashPassword(newPassword);
+  settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, newHash);
+}
+
+export function updateNotificationSettings(notifications: Record<string, string>) {
+  for (const [field, key] of Object.entries(notificationKeys) as Array<[keyof typeof notificationKeys, string]>) {
+    if (notifications[field] !== undefined) {
+      settingsRepo.set(key, (notifications[field] ?? '').trim());
+    }
+  }
 }
 
 export function getAdminSettings() {
@@ -113,6 +140,7 @@ export async function completeInitialSetup(input: SetupInput) {
   settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, passwordHash);
   settingsRepo.set(ADMIN_SOURCE_KEY, 'wizard');
   settingsRepo.set(LANGUAGE_KEY, input.language === 'en' ? 'en' : 'fr');
+  settingsRepo.set(INSTANCE_NAME_KEY, (input.instanceName ?? 'PiGuard').trim() || 'PiGuard');
   settingsRepo.set(SETUP_KEY, '1');
   settingsRepo.set(SETUP_COMPLETED_AT_KEY, new Date().toISOString());
 

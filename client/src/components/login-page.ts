@@ -5,6 +5,7 @@ import { ensureCsrfToken } from '../lib/api.js';
 @customElement('pg-login')
 export class LoginPage extends LitElement {
   @property() errorMessage = '';
+  @property() instanceName = 'PiGuard';
   @state() private username = '';
   @state() private password = '';
   @state() private error = '';
@@ -242,7 +243,7 @@ export class LoginPage extends LitElement {
       <canvas></canvas>
       <div class="login-card">
         <div class="logo">
-          <div class="logo-text">PiGuard</div>
+          <div class="logo-text">${this.instanceName}</div>
           <div class="logo-sub">monitoring dashboard</div>
         </div>
         <form @submit=${this.handleSubmit}>

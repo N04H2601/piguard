@@ -22,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 @customElement('pg-sidebar')
 export class Sidebar extends LitElement {
   @property() currentRoute = 'dashboard';
+  @property() instanceName = 'PiGuard';
   @property({ type: Boolean }) collapsed = false;
   @property({ type: Boolean, attribute: 'mobile-open' }) mobileOpen = false;
   @property({ type: Number }) activeAlerts = 0;
@@ -238,7 +239,7 @@ export class Sidebar extends LitElement {
   render() {
     return html`
       <div class="header">
-        <span class="logo">PiGuard</span>
+        <span class="logo">${this.instanceName}</span>
         <button class="collapse-btn" @click=${this.toggleCollapse} title="Toggle sidebar">◀</button>
       </div>
 

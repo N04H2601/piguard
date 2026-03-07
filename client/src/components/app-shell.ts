@@ -32,6 +32,7 @@ export class AppShell extends LitElement {
   @state() private wsConnected = false;
   @state() private activeAlerts = 0;
   @state() private servicesDown = 0;
+  @state() private instanceName = 'PiGuard';
   @state() private authError: string | null = null;
 
   private unsubscribe: (() => void) | null = null;
@@ -207,7 +208,9 @@ export class AppShell extends LitElement {
     this.servicesDown = currentState.servicesDown;
     this.mobileSidebarOpen = currentState.mobileSidebarOpen;
     this.kioskMode = currentState.kioskMode;
+    this.instanceName = currentState.instanceName;
     this.authError = currentState.authError;
+    document.title = this.instanceName || 'PiGuard';
   }
 
   private async checkAuth() {
@@ -225,9 +228,9 @@ export class AppShell extends LitElement {
     }
 
     try {
-      const data = await apiFetch<{ username: string }>('/api/v1/auth/me', { suppressUnauthorized: true });
+      const data = await apiFetch<{ username: string; instanceName?: string }>('/api/v1/auth/me', { suppressUnauthorized: true });
       if (data.username) {
-        setState({ authenticated: true, username: data.username, authError: null });
+        setState({ authenticated: true, username: data.username, instanceName: data.instanceName || 'PiGuard', authError: null });
         connectWs();
         startSummarySync();
       }
@@ -296,7 +299,7 @@ export class AppShell extends LitElement {
     }
 
     if (!this.authenticated) {
-      return html`<pg-login .errorMessage=${this.authError ?? ''} @login-success=${() => this.onLoginSuccess()}></pg-login>`;
+      return html`<pg-login .errorMessage=${this.authError ?? ''} .instanceName=${this.instanceName} @login-success=${() => this.onLoginSuccess()}></pg-login>`;
     }
 
     return html`
@@ -305,6 +308,7 @@ export class AppShell extends LitElement {
         ${!this.kioskMode ? html`
           <pg-sidebar
             .currentRoute=${this.currentRoute}
+            .instanceName=${this.instanceName}
             ?collapsed=${this.sidebarCollapsed}
             ?mobile-open=${this.mobileSidebarOpen}
             .activeAlerts=${this.activeAlerts}

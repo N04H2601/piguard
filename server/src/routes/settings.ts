@@ -1,10 +1,76 @@
 import { Router, Request, Response } from 'express';
 import { settingsRepo } from '../database/repositories.js';
+import {
+  getInstanceName, setInstanceName,
+  getAppLanguage, setAppLanguage,
+  changeAdminPassword, getNotificationSettings, updateNotificationSettings,
+} from '../services/setup.service.js';
+import { refreshAuthState, verifyPassword, getAdminUsername } from '../services/auth.service.js';
 
 const router = Router();
 
 router.get('/', (_req: Request, res: Response) => {
   res.json({ success: true, data: settingsRepo.getAll() });
+});
+
+router.get('/instance', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    data: {
+      instanceName: getInstanceName(),
+      language: getAppLanguage(),
+    },
+  });
+});
+
+router.put('/instance', (req: Request, res: Response) => {
+  const { instanceName, language } = req.body ?? {};
+  if (instanceName !== undefined) setInstanceName(String(instanceName));
+  if (language === 'fr' || language === 'en') setAppLanguage(language);
+  res.json({ success: true });
+});
+
+router.put('/password', async (req: Request, res: Response) => {
+  const { currentPassword, newPassword } = req.body ?? {};
+
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ success: false, error: 'currentPassword and newPassword are required' });
+    return;
+  }
+
+  if (typeof newPassword !== 'string' || newPassword.length < 10) {
+    res.status(400).json({ success: false, error: 'New password must be at least 10 characters' });
+    return;
+  }
+
+  if (!(await verifyPassword(currentPassword))) {
+    res.status(403).json({ success: false, error: 'Current password is incorrect' });
+    return;
+  }
+
+  await changeAdminPassword(newPassword);
+  await refreshAuthState();
+  res.json({ success: true });
+});
+
+router.get('/notifications', (_req: Request, res: Response) => {
+  const settings = getNotificationSettings();
+  res.json({
+    success: true,
+    data: {
+      ntfyUrl: settings.ntfyUrl,
+      ntfyTopic: settings.ntfyTopic,
+      telegramBotToken: settings.telegramBotToken ? '••••••' : '',
+      telegramChatId: settings.telegramChatId,
+      webhookUrl: settings.webhookUrl,
+    },
+  });
+});
+
+router.put('/notifications', (req: Request, res: Response) => {
+  const body = req.body ?? {};
+  updateNotificationSettings(body);
+  res.json({ success: true });
 });
 
 router.put('/:key', (req: Request, res: Response) => {
@@ -14,7 +80,6 @@ router.put('/:key', (req: Request, res: Response) => {
     res.status(400).json({ success: false, error: 'value is required' });
     return;
   }
-  // Validate key format
   if (!/^[a-zA-Z0-9._-]+$/.test(key)) {
     res.status(400).json({ success: false, error: 'Invalid setting key' });
     return;

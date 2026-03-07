@@ -13,6 +13,7 @@ interface SetupCheck {
 
 @customElement('pg-setup-wizard')
 export class SetupWizard extends LitElement {
+  @state() private instanceName = 'PiGuard';
   @state() private username = 'admin';
   @state() private password = '';
   @state() private passwordConfirm = '';
@@ -283,6 +284,7 @@ export class SetupWizard extends LitElement {
           username: this.username.trim(),
           password: this.password,
           language: this.language,
+          instanceName: this.instanceName.trim() || 'PiGuard',
           healthChecks: validChecks,
           notifications: {
             ntfyUrl: this.ntfyUrl.trim(),
@@ -320,6 +322,17 @@ export class SetupWizard extends LitElement {
 
         <form class="content" @submit=${this.handleSubmit}>
           <div class="panel">
+            <div class="section">
+              <div class="section-title">Instance</div>
+              <div class="grid one">
+                <label>
+                  Instance Name
+                  <input placeholder="My HomeLab" .value=${this.instanceName} @input=${(event: Event) => { this.instanceName = (event.target as HTMLInputElement).value; }} />
+                </label>
+              </div>
+              <div class="hint">Displayed in the sidebar, login page, and browser tab title.</div>
+            </div>
+
             <div class="section">
               <div class="section-title">Admin Access</div>
               <div class="grid">
