@@ -266,6 +266,20 @@ export class SettingsPanel extends LitElement {
     }
   }
 
+  private async testChannel(channel: string) {
+    this.error = '';
+    try {
+      await apiFetch('/api/v1/settings/notifications/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel }),
+      });
+      this.showSuccess(`Test ${channel} notification sent.`);
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : `Failed to send test ${channel} notification`;
+    }
+  }
+
   private async createApiKey() {
     if (!this.newKeyName.trim()) return;
     this.error = '';
@@ -393,6 +407,10 @@ export class SettingsPanel extends LitElement {
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" @click=${() => void this.saveNotifications()}>Save Notifications</button>
+          ${this.ntfyUrl && this.ntfyTopic ? html`<button class="btn btn-outline" @click=${() => void this.testChannel('ntfy')}>Test ntfy</button>` : ''}
+          ${this.telegramBotToken && this.telegramChatId ? html`<button class="btn btn-outline" @click=${() => void this.testChannel('telegram')}>Test Telegram</button>` : ''}
+          ${this.webhookUrl ? html`<button class="btn btn-outline" @click=${() => void this.testChannel('webhook')}>Test Webhook</button>` : ''}
+          ${this.smtpHost && this.smtpFrom && this.smtpTo ? html`<button class="btn btn-outline" @click=${() => void this.testChannel('email')}>Test Email</button>` : ''}
         </div>
       </div>
 

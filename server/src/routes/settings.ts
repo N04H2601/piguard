@@ -6,6 +6,7 @@ import {
   changeAdminPassword, getNotificationSettings, updateNotificationSettings,
 } from '../services/setup.service.js';
 import { refreshAuthState, verifyPassword, getAdminUsername } from '../services/auth.service.js';
+import { sendNotification } from '../services/notification.service.js';
 
 const router = Router();
 
@@ -77,6 +78,29 @@ router.put('/notifications', (req: Request, res: Response) => {
   const body = req.body ?? {};
   updateNotificationSettings(body);
   res.json({ success: true });
+});
+
+const VALID_TEST_CHANNELS = ['ntfy', 'telegram', 'webhook', 'email'];
+
+router.post('/notifications/test', async (req: Request, res: Response) => {
+  const { channel } = req.body ?? {};
+  if (!channel || !VALID_TEST_CHANNELS.includes(channel)) {
+    res.status(400).json({ success: false, error: `channel must be one of: ${VALID_TEST_CHANNELS.join(', ')}` });
+    return;
+  }
+
+  try {
+    await sendNotification([channel], {
+      ruleName: 'Test Notification',
+      severity: 'info',
+      value: 0,
+      message: `This is a test notification from PiGuard (${getInstanceName()}).`,
+      timestamp: new Date().toISOString(),
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(502).json({ success: false, error: err instanceof Error ? err.message : 'Failed to send test notification' });
+  }
 });
 
 const BLOCKED_PREFIXES = ['auth.', 'app.setup'];
