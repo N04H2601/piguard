@@ -36,6 +36,7 @@ router.get('/vhosts', (_req: Request, res: Response) => {
   res.json({ success: true, data: vhosts });
 });
 
+// API-only: no frontend consumer. Use via API key for historical nginx data.
 router.get('/history', (req: Request, res: Response) => {
   const from = parseInt(req.query.from as string) || Date.now() - 86400000;
   const to = parseInt(req.query.to as string) || Date.now();

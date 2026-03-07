@@ -25,6 +25,7 @@ router.get('/history', (req: Request, res: Response) => {
   res.json({ success: true, data });
 });
 
+// API-only: no frontend consumer. Use via API key for data export.
 router.get('/export', (req: Request, res: Response) => {
   const metric = req.query.metric as string;
   const from = parseInt(req.query.from as string) || Date.now() - 86400000;

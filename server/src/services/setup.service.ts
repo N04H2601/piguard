@@ -80,9 +80,11 @@ export async function changeAdminPassword(newPassword: string) {
   settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, newHash);
 }
 
+const MASKED_VALUE = '••••••';
+
 export function updateNotificationSettings(notifications: Record<string, string>) {
   for (const [field, key] of Object.entries(notificationKeys) as Array<[keyof typeof notificationKeys, string]>) {
-    if (notifications[field] !== undefined) {
+    if (notifications[field] !== undefined && notifications[field] !== MASKED_VALUE) {
       settingsRepo.set(key, (notifications[field] ?? '').trim());
     }
   }

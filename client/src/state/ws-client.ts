@@ -5,9 +5,6 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectDelay = 1000;
 let manualClose = false;
 
-type MessageHandler = (data: any) => void;
-const handlers = new Map<string, Set<MessageHandler>>();
-
 export function connectWs() {
   if (ws?.readyState === WebSocket.OPEN) return;
   manualClose = false;
@@ -27,10 +24,6 @@ export function connectWs() {
       const msg = JSON.parse(event.data);
       if (msg.type === 'system') {
         setState({ systemData: msg.data, anomalies: msg.anomalies ?? {} });
-      }
-      const typeHandlers = handlers.get(msg.type);
-      if (typeHandlers) {
-        for (const fn of typeHandlers) fn(msg);
       }
     } catch { /* ignore */ }
   };
@@ -66,18 +59,3 @@ export function disconnectWs() {
   ws = null;
 }
 
-export function onWsMessage(type: string, fn: MessageHandler): () => void {
-  let set = handlers.get(type);
-  if (!set) {
-    set = new Set();
-    handlers.set(type, set);
-  }
-  set.add(fn);
-  return () => set!.delete(fn);
-}
-
-export function sendWs(data: any) {
-  if (ws?.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(data));
-  }
-}

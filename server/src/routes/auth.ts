@@ -6,6 +6,7 @@ import { getLogger } from '../logger.js';
 import { ensureCsrfToken } from '../middleware/security.js';
 import { completeInitialSetup, getSetupStatus, isSetupComplete, getInstanceName } from '../services/setup.service.js';
 import { parseIdParam } from '../lib/params.js';
+import { isCookieSecure } from '../config.js';
 
 const router = Router();
 
@@ -75,6 +76,12 @@ router.post('/setup', async (req: Request, res: Response) => {
       telegramBotToken: typeof notifications?.telegramBotToken === 'string' ? notifications.telegramBotToken : '',
       telegramChatId: typeof notifications?.telegramChatId === 'string' ? notifications.telegramChatId : '',
       webhookUrl: typeof notifications?.webhookUrl === 'string' ? notifications.webhookUrl : '',
+      smtpHost: typeof notifications?.smtpHost === 'string' ? notifications.smtpHost : '',
+      smtpPort: typeof notifications?.smtpPort === 'string' ? notifications.smtpPort : '',
+      smtpUser: typeof notifications?.smtpUser === 'string' ? notifications.smtpUser : '',
+      smtpPass: typeof notifications?.smtpPass === 'string' ? notifications.smtpPass : '',
+      smtpFrom: typeof notifications?.smtpFrom === 'string' ? notifications.smtpFrom : '',
+      smtpTo: typeof notifications?.smtpTo === 'string' ? notifications.smtpTo : '',
     },
   });
 
@@ -82,7 +89,7 @@ router.post('/setup', async (req: Request, res: Response) => {
   const token = await createToken(username.trim());
   res.cookie('piguard_session', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isCookieSecure(req),
     sameSite: 'strict',
     maxAge: 86400000,
     path: '/',
@@ -119,7 +126,7 @@ router.post('/login', loginLimiter, async (req: Request, res: Response) => {
 
   res.cookie('piguard_session', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isCookieSecure(req),
     sameSite: 'strict',
     maxAge: 86400000,
     path: '/',

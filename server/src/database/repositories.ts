@@ -254,9 +254,6 @@ export const arpRepo = {
     getDatabase().prepare('UPDATE arp_devices SET known = ?, alias = COALESCE(?, alias) WHERE mac = ?').run(known ? 1 : 0, alias ?? null, mac);
   },
 
-  getUnknown() {
-    return getDatabase().prepare('SELECT * FROM arp_devices WHERE known = 0 ORDER BY last_seen DESC').all();
-  },
 };
 
 export const loginRepo = {
@@ -270,13 +267,6 @@ export const loginRepo = {
     return getDatabase().prepare('SELECT * FROM login_attempts ORDER BY timestamp DESC LIMIT ?').all(limit);
   },
 
-  countFailedRecent(ip: string, windowMs: number) {
-    const since = Date.now() - windowMs;
-    const row = getDatabase().prepare(
-      'SELECT COUNT(*) as c FROM login_attempts WHERE ip = ? AND success = 0 AND timestamp >= ?'
-    ).get(ip, since) as any;
-    return row.c;
-  },
 };
 
 export const settingsRepo = {
@@ -295,11 +285,6 @@ export const settingsRepo = {
     return getDatabase().prepare('SELECT * FROM settings ORDER BY key').all();
   },
 
-  getMany(keys: string[]) {
-    if (keys.length === 0) return [];
-    const placeholders = keys.map(() => '?').join(', ');
-    return getDatabase().prepare(`SELECT * FROM settings WHERE key IN (${placeholders}) ORDER BY key`).all(...keys);
-  },
 };
 
 export const nginxStatsRepo = {
