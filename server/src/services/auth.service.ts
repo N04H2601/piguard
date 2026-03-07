@@ -2,7 +2,7 @@ import { getConfig } from '../config.js';
 import { getLogger } from '../logger.js';
 import { createHash, randomBytes } from 'crypto';
 import { SignJWT, jwtVerify } from 'jose';
-import { apiKeysRepo } from '../database/repositories.js';
+import { apiKeysRepo, settingsRepo } from '../database/repositories.js';
 import { getAdminSettings } from './setup.service.js';
 
 let passwordHash = '';
@@ -11,11 +11,30 @@ let jwtSecretKey: Uint8Array;
 let hashReady = false;
 let argon2: any;
 
-export async function initAuth(): Promise<void> {
+const JWT_SECRET_KEY = 'auth.jwt_secret';
+
+function resolveJwtSecret(): string {
   const config = getConfig();
+
+  // Explicit env var takes precedence
+  if (config.JWT_SECRET && config.JWT_SECRET.length >= 32) {
+    return config.JWT_SECRET;
+  }
+
+  // Try to load persisted secret from DB
+  const persisted = settingsRepo.get(JWT_SECRET_KEY);
+  if (persisted) return persisted;
+
+  // Generate and persist a new secret
+  const generated = randomBytes(32).toString('hex');
+  settingsRepo.set(JWT_SECRET_KEY, generated);
+  return generated;
+}
+
+export async function initAuth(): Promise<void> {
   const log = getLogger();
 
-  jwtSecretKey = new TextEncoder().encode(config.JWT_SECRET);
+  jwtSecretKey = new TextEncoder().encode(resolveJwtSecret());
 
   try {
     argon2 = await import('argon2');
