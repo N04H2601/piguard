@@ -5,7 +5,7 @@ import '../shared/card.js';
 import '../shared/loading-state.js';
 import '../shared/empty-state.js';
 
-@customElement('n04h-security-panel')
+@customElement('pg-security-panel')
 export class SecurityPanel extends LitElement {
   @state() private score: any = null;
   @state() private fail2ban: any[] = [];
@@ -117,7 +117,7 @@ export class SecurityPanel extends LitElement {
       </div>
 
       ${this.error ? html`<div class="error">${this.error}</div>` : ''}
-      ${this.loading ? html`<n04h-loading-state label="Loading security posture"></n04h-loading-state>` : ''}
+      ${this.loading ? html`<pg-loading-state label="Loading security posture"></pg-loading-state>` : ''}
       ${!this.loading ? this.renderCurrentTab() : ''}
     `;
   }
@@ -139,7 +139,7 @@ export class SecurityPanel extends LitElement {
 
   private renderOverview() {
     if (!this.score) {
-      return html`<n04h-empty-state title="No score" detail="Security controls could not be evaluated."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No score" detail="Security controls could not be evaluated."></pg-empty-state>`;
     }
 
     return html`
@@ -164,7 +164,7 @@ export class SecurityPanel extends LitElement {
 
   private renderFail2ban() {
     if (this.fail2ban.length === 0) {
-      return html`<n04h-empty-state title="No fail2ban data" detail="No jail status could be derived from the mounted logs or runtime."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No fail2ban data" detail="No jail status could be derived from the mounted logs or runtime."></pg-empty-state>`;
     }
 
     return html`
@@ -183,7 +183,7 @@ export class SecurityPanel extends LitElement {
 
   private renderAuth() {
     if (this.authEvents.length === 0) {
-      return html`<n04h-empty-state title="No auth events" detail="auth.log is empty, inaccessible, or no matching SSH/sudo events were found."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No auth events" detail="auth.log is empty, inaccessible, or no matching SSH/sudo events were found."></pg-empty-state>`;
     }
 
     return html`
@@ -207,7 +207,7 @@ export class SecurityPanel extends LitElement {
 
   private renderLogins() {
     if (this.loginHistory.length === 0) {
-      return html`<n04h-empty-state title="No login history" detail="Authentication attempts will appear here once users start interacting with the dashboard."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No login history" detail="Authentication attempts will appear here once users start interacting with the dashboard."></pg-empty-state>`;
     }
 
     return html`

@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('n04h-card')
+@customElement('pg-card')
 export class Card extends LitElement {
   @property() cardTitle = '';
   @property() icon = '';

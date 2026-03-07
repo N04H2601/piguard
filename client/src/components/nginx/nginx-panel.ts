@@ -4,7 +4,7 @@ import { apiFetch } from '../../lib/api.js';
 import '../shared/loading-state.js';
 import '../shared/empty-state.js';
 
-@customElement('n04h-nginx-panel')
+@customElement('pg-nginx-panel')
 export class NginxPanel extends LitElement {
   @state() private stats: any = null;
   @state() private errors: string[] = [];
@@ -92,7 +92,7 @@ export class NginxPanel extends LitElement {
       </div>
 
       ${this.error ? html`<div class="error">${this.error}</div>` : ''}
-      ${this.loading ? html`<n04h-loading-state label="Loading nginx telemetry"></n04h-loading-state>` : this.renderCurrentTab()}
+      ${this.loading ? html`<pg-loading-state label="Loading nginx telemetry"></pg-loading-state>` : this.renderCurrentTab()}
     `;
   }
 
@@ -110,7 +110,7 @@ export class NginxPanel extends LitElement {
   }
 
   private renderStats() {
-    if (!this.stats) return html`<n04h-empty-state title="No nginx stats" detail="No access log entries could be parsed from the mounted environment."></n04h-empty-state>`;
+    if (!this.stats) return html`<pg-empty-state title="No nginx stats" detail="No access log entries could be parsed from the mounted environment."></pg-empty-state>`;
     const stats = this.stats;
     return html`
       <div class="summary-grid">
@@ -125,15 +125,15 @@ export class NginxPanel extends LitElement {
       <div class="two-col">
         <div class="top-list">
           <div class="top-title">Top URIs</div>
-          ${(stats.topUris ?? []).length ? stats.topUris.map((entry: any) => html`<div class="top-item"><span class="top-key">${entry.key}</span><span class="top-count">${entry.count}</span></div>`) : html`<n04h-empty-state title="No URIs"></n04h-empty-state>`}
+          ${(stats.topUris ?? []).length ? stats.topUris.map((entry: any) => html`<div class="top-item"><span class="top-key">${entry.key}</span><span class="top-count">${entry.count}</span></div>`) : html`<pg-empty-state title="No URIs"></pg-empty-state>`}
         </div>
         <div class="top-list">
           <div class="top-title">Top IPs</div>
-          ${(stats.topIps ?? []).length ? stats.topIps.map((entry: any) => html`<div class="top-item"><span class="top-key">${entry.key}</span><span class="top-count">${entry.count}</span></div>`) : html`<n04h-empty-state title="No clients"></n04h-empty-state>`}
+          ${(stats.topIps ?? []).length ? stats.topIps.map((entry: any) => html`<div class="top-item"><span class="top-key">${entry.key}</span><span class="top-count">${entry.count}</span></div>`) : html`<pg-empty-state title="No clients"></pg-empty-state>`}
         </div>
         <div class="top-list">
           <div class="top-title">Top VHosts</div>
-          ${(stats.topVhosts ?? []).length ? stats.topVhosts.map((entry: any) => html`<div class="top-item"><span class="top-key">${entry.key}</span><span class="top-count">${entry.count}</span></div>`) : html`<n04h-empty-state title="No vhosts"></n04h-empty-state>`}
+          ${(stats.topVhosts ?? []).length ? stats.topVhosts.map((entry: any) => html`<div class="top-item"><span class="top-key">${entry.key}</span><span class="top-count">${entry.count}</span></div>`) : html`<pg-empty-state title="No vhosts"></pg-empty-state>`}
         </div>
       </div>
     `;
@@ -141,14 +141,14 @@ export class NginxPanel extends LitElement {
 
   private renderErrors() {
     if (this.errors.length === 0) {
-      return html`<n04h-empty-state title="No recent errors" detail="The error log is clean or not mounted in the dashboard container."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No recent errors" detail="The error log is clean or not mounted in the dashboard container."></pg-empty-state>`;
     }
     return html`${this.errors.map((line) => html`<div class="error-line">${line}</div>`)}`;
   }
 
   private renderVhosts() {
     if (this.vhosts.length === 0) {
-      return html`<n04h-empty-state title="No vhosts detected" detail="No nginx site configuration could be discovered from the mounted config paths."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No vhosts detected" detail="No nginx site configuration could be discovered from the mounted config paths."></pg-empty-state>`;
     }
     return html`${this.vhosts.map((vhost) => html`<div class="vhost-card"><div class="vhost-name">${vhost}</div></div>`)}`;
   }

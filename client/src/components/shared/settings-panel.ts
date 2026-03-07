@@ -14,7 +14,7 @@ const THEMES = [
   { id: 'light', name: 'Light', color: '#0891b2' },
 ];
 
-@customElement('n04h-settings-panel')
+@customElement('pg-settings-panel')
 export class SettingsPanel extends LitElement {
   @state() private currentTheme = getState().theme;
   @state() private kioskMode = getState().kioskMode;
@@ -252,8 +252,8 @@ export class SettingsPanel extends LitElement {
 
       <div class="section">
         <div class="section-title">API Keys</div>
-        ${this.loading ? html`<n04h-loading-state label="Loading API keys"></n04h-loading-state>` : ''}
-        ${!this.loading && this.apiKeys.length === 0 ? html`<n04h-empty-state title="No API keys" detail="Generate a key to query the dashboard without a browser session."></n04h-empty-state>` : ''}
+        ${this.loading ? html`<pg-loading-state label="Loading API keys"></pg-loading-state>` : ''}
+        ${!this.loading && this.apiKeys.length === 0 ? html`<pg-empty-state title="No API keys" detail="Generate a key to query the dashboard without a browser session."></pg-empty-state>` : ''}
         ${!this.loading && this.apiKeys.length > 0 ? html`
           <div class="key-list">
             ${this.apiKeys.map((key: any) => html`

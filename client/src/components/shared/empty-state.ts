@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('n04h-empty-state')
+@customElement('pg-empty-state')
 export class EmptyState extends LitElement {
   @property() title = 'No data';
   @property() detail = '';

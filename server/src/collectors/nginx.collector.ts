@@ -3,7 +3,7 @@ import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 const DOCKER_SOCKET = '/var/run/docker.sock';
-const NGINX_CONTAINER_NAME = 'ctfd-nginx-1';
+const NGINX_CONTAINER_NAME = process.env.NGINX_CONTAINER_NAME || 'nginx';
 const INITIAL_TAIL = 200;
 const STREAM_TAIL = 500;
 
@@ -75,7 +75,6 @@ export function detectVhosts(sitesDir = '/etc/nginx/sites-enabled'): string[] {
     return readdirSync(sitesDir).filter((entry) => entry !== '.' && entry !== '..');
   } catch {
     const candidateFiles = [
-      '/opt/ctfd-nginx/http.conf',
       '/host/root/etc/nginx/nginx.conf',
     ];
     const candidateDirs = [

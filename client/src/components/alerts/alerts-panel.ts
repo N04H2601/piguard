@@ -4,7 +4,7 @@ import { apiFetch } from '../../lib/api.js';
 import '../shared/loading-state.js';
 import '../shared/empty-state.js';
 
-@customElement('n04h-alerts-panel')
+@customElement('pg-alerts-panel')
 export class AlertsPanel extends LitElement {
   @state() private rules: any[] = [];
   @state() private active: any[] = [];
@@ -123,7 +123,7 @@ export class AlertsPanel extends LitElement {
       </div>
 
       ${this.error ? html`<div class="error">${this.error}</div>` : ''}
-      ${this.loading ? html`<n04h-loading-state label="Loading alerts"></n04h-loading-state>` : ''}
+      ${this.loading ? html`<pg-loading-state label="Loading alerts"></pg-loading-state>` : ''}
       ${!this.loading ? this.renderCurrentTab() : ''}
     `;
   }
@@ -142,7 +142,7 @@ export class AlertsPanel extends LitElement {
   }
 
   private renderActive() {
-    if (this.active.length === 0) return html`<n04h-empty-state title="No active alerts" detail="The alert engine is currently quiet."></n04h-empty-state>`;
+    if (this.active.length === 0) return html`<pg-empty-state title="No active alerts" detail="The alert engine is currently quiet."></pg-empty-state>`;
     return html`${this.active.map((alert: any) => html`
       <div class="alert-card">
         <div class="severity-dot ${alert.severity}"></div>
@@ -157,7 +157,7 @@ export class AlertsPanel extends LitElement {
   }
 
   private renderHistory() {
-    if (this.history.length === 0) return html`<n04h-empty-state title="No alert history" detail="Resolved and fired alerts will accumulate here over time."></n04h-empty-state>`;
+    if (this.history.length === 0) return html`<pg-empty-state title="No alert history" detail="Resolved and fired alerts will accumulate here over time."></pg-empty-state>`;
     return html`${this.history.map((alert: any) => html`
       <div class="alert-card" style="opacity: ${alert.status === 'resolved' ? 0.6 : 1}">
         <div class="severity-dot ${alert.severity}"></div>
@@ -171,7 +171,7 @@ export class AlertsPanel extends LitElement {
   }
 
   private renderRules() {
-    if (this.rules.length === 0) return html`<n04h-empty-state title="No rules" detail="Create alert rules to watch your metrics automatically."></n04h-empty-state>`;
+    if (this.rules.length === 0) return html`<pg-empty-state title="No rules" detail="Create alert rules to watch your metrics automatically."></pg-empty-state>`;
     return html`${this.rules.map((rule: any) => html`
       <div class="rule-card">
         <div class="rule-header">

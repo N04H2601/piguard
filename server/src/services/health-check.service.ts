@@ -1,4 +1,4 @@
-import { healthChecksRepo, settingsRepo } from '../database/repositories.js';
+import { healthChecksRepo } from '../database/repositories.js';
 import { getLogger } from '../logger.js';
 import { getConfig } from '../config.js';
 import { request as httpRequest } from 'http';
@@ -10,7 +10,6 @@ import { promisify } from 'util';
 import { TLSSocket, connect as tlsConnect } from 'tls';
 
 const execFileAsync = promisify(execFile);
-const DEFAULTS_RECONCILED_KEY = 'health.defaults_reconciled';
 
 let checkInterval: ReturnType<typeof setInterval> | null = null;
 const nextRunAt = new Map<number, number>();
@@ -24,15 +23,6 @@ type DefaultCheck = {
   timeout_ms?: number;
   expected_status?: number;
 };
-
-const legacyBrokenDefaults = new Map<string, { target: string; replacementName?: string }>([
-  ['CTFd', { target: 'https://ctf.n04h.fr', replacementName: 'n04h.fr' }],
-  ['CyberChef', { target: 'https://cyberchef.n04h.fr' }],
-  ['AperiSolve', { target: 'https://aperisolve.n04h.fr' }],
-  ['PsiTransfer', { target: 'https://files.n04h.fr' }],
-  ['Yopass', { target: 'https://ots.n04h.fr' }],
-  ['n04h.fr', { target: 'https://n04h.fr', replacementName: 'Dashboard API' }],
-]);
 
 export function startHealthChecks() {
   const log = getLogger();
@@ -222,21 +212,18 @@ export async function checkSslExpiry(hostname: string, port = 443): Promise<{ da
 export function seedDefaultChecks() {
   const log = getLogger();
   const existing = healthChecksRepo.getAll() as any[];
+
+  if (existing.length > 0) return;
+
   const defaults = getConfiguredDefaultChecks(log);
-
-  if (existing.length === 0) {
-    if (defaults.length === 0) {
-      log.info('No DEFAULT_HEALTH_CHECKS configured; skipping default health-check seeding');
-      return;
-    }
-
-    for (const check of defaults) {
-      healthChecksRepo.create(check);
-    }
+  if (defaults.length === 0) {
+    log.info('No DEFAULT_HEALTH_CHECKS configured; skipping default health-check seeding');
     return;
   }
 
-  reconcileLegacyDefaultChecks(existing, defaults, log);
+  for (const check of defaults) {
+    healthChecksRepo.create(check);
+  }
 }
 
 function getConfiguredDefaultChecks(log: ReturnType<typeof getLogger>): DefaultCheck[] {
@@ -264,74 +251,4 @@ function getConfiguredDefaultChecks(log: ReturnType<typeof getLogger>): DefaultC
     log.warn({ err }, 'Invalid DEFAULT_HEALTH_CHECKS JSON; skipping default health-check seeding');
     return [];
   }
-}
-
-function reconcileLegacyDefaultChecks(existing: any[], defaults: DefaultCheck[], log: ReturnType<typeof getLogger>) {
-  if (settingsRepo.get(DEFAULTS_RECONCILED_KEY) === '1') return;
-
-  const shouldNormalize = shouldNormalizeLegacyDefaults(existing, defaults);
-  if (shouldNormalize) {
-    healthChecksRepo.replaceAll(defaults);
-    settingsRepo.set(DEFAULTS_RECONCILED_KEY, '1');
-    log.info('Normalized legacy default health checks to the configured default set');
-    return;
-  }
-
-  if (defaults.length === 0) return;
-
-  const defaultsByName = new Map(defaults.map((check) => [check.name, check]));
-  const replacements = new Map<string, DefaultCheck>([
-    ['CTFd', defaultsByName.get('n04h.fr') ?? defaultsByName.get('CTFd') ?? defaultsByName.get('Main Site')!],
-    ['CyberChef', defaultsByName.get('CyberChef')!],
-    ['AperiSolve', defaultsByName.get('AperiSolve')!],
-    ['PsiTransfer', defaultsByName.get('PsiTransfer')!],
-    ['Yopass', defaultsByName.get('Yopass')!],
-    ['n04h.fr', defaultsByName.get('Dashboard API') ?? defaultsByName.get('Dashboard')!],
-  ]);
-
-  for (const check of existing) {
-    const legacy = legacyBrokenDefaults.get(check.name);
-    const replacement = replacements.get(check.name);
-    if (!legacy || !replacement) continue;
-    if (check.target !== legacy.target) continue;
-
-    healthChecksRepo.update(check.id, {
-      name: legacy.replacementName ?? replacement.name,
-      type: replacement.type,
-      target: replacement.target,
-      interval_s: replacement.interval_s ?? 60,
-      timeout_ms: replacement.timeout_ms ?? 10000,
-      expected_status: replacement.expected_status ?? 200,
-    });
-
-    log.info({ id: check.id, from: check.target, to: replacement.target }, 'Repaired legacy default health check target');
-  }
-
-  settingsRepo.set(DEFAULTS_RECONCILED_KEY, '1');
-}
-
-function shouldNormalizeLegacyDefaults(existing: any[], defaults: DefaultCheck[]) {
-  if (existing.length === 0 || defaults.length === 0) return false;
-
-  const allowedNames = new Set([
-    ...legacyBrokenDefaults.keys(),
-    ...defaults.map((check) => check.name),
-    'Main Site',
-    'Dashboard API',
-  ]);
-
-  if (existing.some((check) => !allowedNames.has(check.name))) {
-    return false;
-  }
-
-  const names = existing.map((check) => check.name);
-  const uniqueNames = new Set(names);
-  const hasDuplicates = uniqueNames.size !== names.length;
-  const missingConfiguredDefault = defaults.some((check) => !uniqueNames.has(check.name));
-  const hasBrokenTarget = existing.some((check) => {
-    const legacy = legacyBrokenDefaults.get(check.name);
-    return legacy?.target === check.target;
-  });
-
-  return hasDuplicates || missingConfiguredDefault || hasBrokenTarget;
 }

@@ -5,7 +5,7 @@ import '../shared/card.js';
 import '../shared/loading-state.js';
 import '../shared/empty-state.js';
 
-@customElement('n04h-health-panel')
+@customElement('pg-health-panel')
 export class HealthPanel extends LitElement {
   @state() private checks: any[] = [];
   @state() private uptimes: Map<number, any> = new Map();
@@ -164,8 +164,8 @@ export class HealthPanel extends LitElement {
       </div>
 
       ${this.error ? html`<div class="error-banner">${this.error}</div>` : ''}
-      ${this.loading ? html`<n04h-loading-state label="Loading checks"></n04h-loading-state>` : ''}
-      ${!this.loading && this.checks.length === 0 ? html`<n04h-empty-state title="No checks" detail="Create your first uptime check to monitor an external service."></n04h-empty-state>` : ''}
+      ${this.loading ? html`<pg-loading-state label="Loading checks"></pg-loading-state>` : ''}
+      ${!this.loading && this.checks.length === 0 ? html`<pg-empty-state title="No checks" detail="Create your first uptime check to monitor an external service."></pg-empty-state>` : ''}
 
       ${!this.loading && this.checks.length > 0 ? html`
         <div class="checks-grid">

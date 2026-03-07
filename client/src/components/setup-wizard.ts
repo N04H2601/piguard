@@ -11,7 +11,7 @@ interface SetupCheck {
   interval_s: number;
 }
 
-@customElement('n04h-setup-wizard')
+@customElement('pg-setup-wizard')
 export class SetupWizard extends LitElement {
   @state() private username = 'admin';
   @state() private password = '';

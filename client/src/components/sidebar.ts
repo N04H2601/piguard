@@ -19,7 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'settings', label: 'Settings', icon: '⚙' },
 ];
 
-@customElement('n04h-sidebar')
+@customElement('pg-sidebar')
 export class Sidebar extends LitElement {
   @property() currentRoute = 'dashboard';
   @property({ type: Boolean }) collapsed = false;

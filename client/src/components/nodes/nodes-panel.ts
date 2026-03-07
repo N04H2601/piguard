@@ -3,7 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { apiFetch } from '../../lib/api.js';
 import '../shared/loading-state.js';
 
-@customElement('n04h-nodes-panel')
+@customElement('pg-nodes-panel')
 export class NodesPanel extends LitElement {
   @state() private nodes: any[] = [];
   @state() private loading = true;
@@ -59,7 +59,7 @@ export class NodesPanel extends LitElement {
 
   render() {
     if (this.loading) {
-      return html`<n04h-loading-state label="Loading nodes"></n04h-loading-state>`;
+      return html`<pg-loading-state label="Loading nodes"></pg-loading-state>`;
     }
 
     return html`

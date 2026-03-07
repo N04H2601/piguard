@@ -30,7 +30,7 @@ function formatRate(bytesPerSec: number): string {
   return `${(bytesPerSec / 1048576).toFixed(1)} MB/s`;
 }
 
-@customElement('n04h-overview')
+@customElement('pg-overview')
 export class Overview extends LitElement {
   @property({ type: Object }) data: any = null;
   @state() private loadingHistory = true;
@@ -97,7 +97,7 @@ export class Overview extends LitElement {
       grid-column: span 2;
     }
 
-    n04h-gauge {
+    pg-gauge {
       --gauge-max-size: 124px;
     }
 
@@ -309,7 +309,7 @@ export class Overview extends LitElement {
         flex-direction: column;
       }
 
-      n04h-gauge {
+      pg-gauge {
         --gauge-max-size: 108px;
       }
     }
@@ -370,11 +370,11 @@ export class Overview extends LitElement {
 
   render() {
     if (!this.data && this.loadingHistory) {
-      return html`<n04h-loading-state label="Bootstrapping telemetry"></n04h-loading-state>`;
+      return html`<pg-loading-state label="Bootstrapping telemetry"></pg-loading-state>`;
     }
 
     if (!this.data) {
-      return html`<n04h-empty-state title="No live data" detail="The dashboard is connected, but the first telemetry frame has not arrived yet."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No live data" detail="The dashboard is connected, but the first telemetry frame has not arrived yet."></pg-empty-state>`;
     }
 
     const { cpu, memory, temperature, disk, network, uptime, processes } = this.data;
@@ -387,35 +387,35 @@ export class Overview extends LitElement {
         </div>
 
         <div class="gauge-row">
-        <n04h-card cardTitle="CPU" icon="■">
+        <pg-card cardTitle="CPU" icon="■">
           <div class="gauge-center">
-            <n04h-gauge .value=${cpu?.overall ?? 0} label="CPU Usage"></n04h-gauge>
+            <pg-gauge .value=${cpu?.overall ?? 0} label="CPU Usage"></pg-gauge>
             <div class="stat-sub">Load: ${cpu?.loadAvg?.map((l: number) => l.toFixed(2)).join(' / ') ?? '-'}</div>
             ${cpu?.frequency ? html`<div class="stat-sub">${cpu.frequency.toFixed(0)} MHz${cpu.governor ? ` (${cpu.governor})` : ''}</div>` : ''}
             <div class="history-block">
               <div class="history-label">Last hour</div>
-              <n04h-sparkline .values=${this.cpuHistory}></n04h-sparkline>
+              <pg-sparkline .values=${this.cpuHistory}></pg-sparkline>
             </div>
             <div class="core-bars">
               ${(cpu?.cores ?? []).map((usage: number) => html`<div class="core-bar" style="height: ${Math.max(usage, 4)}%; background: ${this.getCoreColor(usage)}"></div>`)}
             </div>
           </div>
-        </n04h-card>
+        </pg-card>
 
-        <n04h-card cardTitle="Memory" icon="▦">
+        <pg-card cardTitle="Memory" icon="▦">
           <div class="gauge-center">
-            <n04h-gauge .value=${memory?.usedPercent ?? 0} label="RAM Usage"></n04h-gauge>
+            <pg-gauge .value=${memory?.usedPercent ?? 0} label="RAM Usage"></pg-gauge>
             <div class="stat-sub">${formatBytes(memory?.used ?? 0)} / ${formatBytes(memory?.total ?? 0)}</div>
             <div class="stat-sub">Cache: ${formatBytes(memory?.cached ?? 0)} | Buffers: ${formatBytes(memory?.buffers ?? 0)}</div>
             ${memory?.swap?.total > 0 ? html`<div class="stat-sub">Swap: ${formatBytes(memory.swap.used)} / ${formatBytes(memory.swap.total)}</div>` : ''}
             <div class="history-block">
               <div class="history-label">Last hour</div>
-              <n04h-sparkline .values=${this.memoryHistory} color="var(--info)" fill="color-mix(in srgb, var(--info) 18%, transparent)"></n04h-sparkline>
+              <pg-sparkline .values=${this.memoryHistory} color="var(--info)" fill="color-mix(in srgb, var(--info) 18%, transparent)"></pg-sparkline>
             </div>
           </div>
-        </n04h-card>
+        </pg-card>
 
-        <n04h-card
+        <pg-card
           cardTitle="Temperature"
           icon="♨"
           .status=${(temperature?.temp ?? 0) >= 80 ? 'danger' : (temperature?.temp ?? 0) >= 65 ? 'warning' : 'normal'}
@@ -432,18 +432,18 @@ export class Overview extends LitElement {
               </div>
             ` : ''}
           </div>
-        </n04h-card>
+        </pg-card>
 
-        <n04h-card cardTitle="Uptime" icon="⏱">
+        <pg-card cardTitle="Uptime" icon="⏱">
           <div class="gauge-center">
             <span class="stat-value">${formatUptime(uptime?.seconds ?? 0)}</span>
             <span class="stat-label">System Uptime</span>
           </div>
-        </n04h-card>
+        </pg-card>
         </div>
 
         <div class="grid">
-        <n04h-card cardTitle="Disk Usage" icon="◉">
+        <pg-card cardTitle="Disk Usage" icon="◉">
           ${disk?.length ? html`
             <div class="disk-list">
               ${disk.map((entry: any) => html`
@@ -464,14 +464,14 @@ export class Overview extends LitElement {
                 </div>
               `)}
             </div>
-          ` : html`<n04h-empty-state title="No disks" detail="No mounted block devices were detected."></n04h-empty-state>`}
-        </n04h-card>
+          ` : html`<pg-empty-state title="No disks" detail="No mounted block devices were detected."></pg-empty-state>`}
+        </pg-card>
 
-        <n04h-card cardTitle="Network" icon="◈">
+        <pg-card cardTitle="Network" icon="◈">
           ${network?.length ? html`
             <div class="history-block">
               <div class="history-label">Aggregate bandwidth</div>
-              <n04h-sparkline .values=${this.networkHistory} color="var(--success)" fill="color-mix(in srgb, var(--success) 18%, transparent)"></n04h-sparkline>
+              <pg-sparkline .values=${this.networkHistory} color="var(--success)" fill="color-mix(in srgb, var(--success) 18%, transparent)"></pg-sparkline>
             </div>
             ${(network ?? []).map((iface: any) => html`
               <div class="net-interface">
@@ -482,10 +482,10 @@ export class Overview extends LitElement {
                 </div>
               </div>
             `)}
-          ` : html`<n04h-empty-state title="No interfaces" detail="The collector did not report any active network interfaces."></n04h-empty-state>`}
-        </n04h-card>
+          ` : html`<pg-empty-state title="No interfaces" detail="The collector did not report any active network interfaces."></pg-empty-state>`}
+        </pg-card>
 
-        <n04h-card class="wide" cardTitle="Top Processes" icon="☰">
+        <pg-card class="wide" cardTitle="Top Processes" icon="☰">
           ${processes?.length ? html`
             <div class="process-wrap">
               <div class="process-table">
@@ -500,8 +500,8 @@ export class Overview extends LitElement {
                 `)}
               </div>
             </div>
-          ` : html`<n04h-empty-state title="No process list" detail="The process collector is unavailable in this environment."></n04h-empty-state>`}
-        </n04h-card>
+          ` : html`<pg-empty-state title="No process list" detail="The process collector is unavailable in this environment."></pg-empty-state>`}
+        </pg-card>
         </div>
       </div>
     `;

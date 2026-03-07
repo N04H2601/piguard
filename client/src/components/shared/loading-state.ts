@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('n04h-loading-state')
+@customElement('pg-loading-state')
 export class LoadingState extends LitElement {
   @property() label = 'Loading';
 

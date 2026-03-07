@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { ensureCsrfToken } from '../lib/api.js';
 
-@customElement('n04h-login')
+@customElement('pg-login')
 export class LoginPage extends LitElement {
   @property() errorMessage = '';
   @state() private username = '';
