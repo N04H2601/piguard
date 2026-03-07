@@ -24,6 +24,12 @@ export interface SetupInput {
     telegramBotToken?: string;
     telegramChatId?: string;
     webhookUrl?: string;
+    smtpHost?: string;
+    smtpPort?: string;
+    smtpUser?: string;
+    smtpPass?: string;
+    smtpFrom?: string;
+    smtpTo?: string;
   };
 }
 
@@ -41,6 +47,12 @@ const notificationKeys = {
   telegramBotToken: 'notify.telegram_bot_token',
   telegramChatId: 'notify.telegram_chat_id',
   webhookUrl: 'notify.webhook_url',
+  smtpHost: 'notify.smtp_host',
+  smtpPort: 'notify.smtp_port',
+  smtpUser: 'notify.smtp_user',
+  smtpPass: 'notify.smtp_pass',
+  smtpFrom: 'notify.smtp_from',
+  smtpTo: 'notify.smtp_to',
 } as const;
 
 export function isSetupComplete() {
@@ -124,6 +136,12 @@ export async function bootstrapLegacySetupFromEnv() {
     [notificationKeys.telegramBotToken, config.TELEGRAM_BOT_TOKEN],
     [notificationKeys.telegramChatId, config.TELEGRAM_CHAT_ID],
     [notificationKeys.webhookUrl, config.WEBHOOK_URL],
+    [notificationKeys.smtpHost, config.SMTP_HOST],
+    [notificationKeys.smtpPort, config.SMTP_PORT ? String(config.SMTP_PORT) : undefined],
+    [notificationKeys.smtpUser, config.SMTP_USER],
+    [notificationKeys.smtpPass, config.SMTP_PASS],
+    [notificationKeys.smtpFrom, config.SMTP_FROM],
+    [notificationKeys.smtpTo, config.SMTP_TO],
   ];
 
   for (const [key, value] of notificationPairs) {
@@ -170,6 +188,12 @@ export function getNotificationSettings() {
     telegramBotToken: settingsRepo.get(notificationKeys.telegramBotToken, config.TELEGRAM_BOT_TOKEN ?? ''),
     telegramChatId: settingsRepo.get(notificationKeys.telegramChatId, config.TELEGRAM_CHAT_ID ?? ''),
     webhookUrl: settingsRepo.get(notificationKeys.webhookUrl, config.WEBHOOK_URL ?? ''),
+    smtpHost: settingsRepo.get(notificationKeys.smtpHost, config.SMTP_HOST ?? ''),
+    smtpPort: settingsRepo.get(notificationKeys.smtpPort, String(config.SMTP_PORT ?? '')),
+    smtpUser: settingsRepo.get(notificationKeys.smtpUser, config.SMTP_USER ?? ''),
+    smtpPass: settingsRepo.get(notificationKeys.smtpPass, config.SMTP_PASS ?? ''),
+    smtpFrom: settingsRepo.get(notificationKeys.smtpFrom, config.SMTP_FROM ?? ''),
+    smtpTo: settingsRepo.get(notificationKeys.smtpTo, config.SMTP_TO ?? ''),
   };
 }
 

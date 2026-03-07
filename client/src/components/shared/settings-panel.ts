@@ -40,6 +40,12 @@ export class SettingsPanel extends LitElement {
   @state() private telegramBotToken = '';
   @state() private telegramChatId = '';
   @state() private webhookUrl = '';
+  @state() private smtpHost = '';
+  @state() private smtpPort = '';
+  @state() private smtpUser = '';
+  @state() private smtpPass = '';
+  @state() private smtpFrom = '';
+  @state() private smtpTo = '';
 
   private unsubscribe: (() => void) | null = null;
 
@@ -177,6 +183,12 @@ export class SettingsPanel extends LitElement {
       this.telegramBotToken = notifications.telegramBotToken ?? '';
       this.telegramChatId = notifications.telegramChatId ?? '';
       this.webhookUrl = notifications.webhookUrl ?? '';
+      this.smtpHost = notifications.smtpHost ?? '';
+      this.smtpPort = notifications.smtpPort ?? '';
+      this.smtpUser = notifications.smtpUser ?? '';
+      this.smtpPass = notifications.smtpPass ?? '';
+      this.smtpFrom = notifications.smtpFrom ?? '';
+      this.smtpTo = notifications.smtpTo ?? '';
       this.apiKeys = keys;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load settings';
@@ -240,6 +252,12 @@ export class SettingsPanel extends LitElement {
           telegramBotToken: this.telegramBotToken,
           telegramChatId: this.telegramChatId,
           webhookUrl: this.webhookUrl,
+          smtpHost: this.smtpHost,
+          smtpPort: this.smtpPort,
+          smtpUser: this.smtpUser,
+          smtpPass: this.smtpPass,
+          smtpFrom: this.smtpFrom,
+          smtpTo: this.smtpTo,
         }),
       });
       this.showSuccess('Notification settings saved.');
@@ -347,6 +365,30 @@ export class SettingsPanel extends LitElement {
           <div class="form-field">
             <span class="form-label">Webhook URL</span>
             <input .value=${this.webhookUrl} @input=${(e: Event) => this.webhookUrl = (e.target as HTMLInputElement).value} placeholder="https://hooks.example.com/..." />
+          </div>
+          <div class="form-field">
+            <span class="form-label">SMTP Host</span>
+            <input .value=${this.smtpHost} @input=${(e: Event) => this.smtpHost = (e.target as HTMLInputElement).value} placeholder="smtp.example.com" />
+          </div>
+          <div class="form-field">
+            <span class="form-label">SMTP Port</span>
+            <input .value=${this.smtpPort} @input=${(e: Event) => this.smtpPort = (e.target as HTMLInputElement).value} placeholder="587" />
+          </div>
+          <div class="form-field">
+            <span class="form-label">SMTP User</span>
+            <input .value=${this.smtpUser} @input=${(e: Event) => this.smtpUser = (e.target as HTMLInputElement).value} />
+          </div>
+          <div class="form-field">
+            <span class="form-label">SMTP Password</span>
+            <input type="password" .value=${this.smtpPass} @input=${(e: Event) => this.smtpPass = (e.target as HTMLInputElement).value} />
+          </div>
+          <div class="form-field">
+            <span class="form-label">SMTP From</span>
+            <input .value=${this.smtpFrom} @input=${(e: Event) => this.smtpFrom = (e.target as HTMLInputElement).value} placeholder="alerts@example.com" />
+          </div>
+          <div class="form-field">
+            <span class="form-label">SMTP To</span>
+            <input .value=${this.smtpTo} @input=${(e: Event) => this.smtpTo = (e.target as HTMLInputElement).value} placeholder="admin@example.com" />
           </div>
         </div>
         <div class="form-actions">

@@ -1,6 +1,7 @@
 import { getLogger } from '../logger.js';
 import { request as httpsRequest } from 'https';
 import { request as httpRequest } from 'http';
+import { createTransport } from 'nodemailer';
 import { getNotificationSettings } from './setup.service.js';
 
 interface AlertPayload {
@@ -25,6 +26,9 @@ export async function sendNotification(channels: string[], payload: AlertPayload
           break;
         case 'telegram':
           await sendTelegram(payload);
+          break;
+        case 'email':
+          await sendEmail(payload);
           break;
         default:
           log.warn({ channel }, 'Unknown notification channel');
@@ -83,4 +87,25 @@ async function sendTelegram(payload: AlertPayload): Promise<void> {
     text,
     parse_mode: 'Markdown',
   }));
+}
+
+async function sendEmail(payload: AlertPayload): Promise<void> {
+  const config = getNotificationSettings();
+  if (!config.smtpHost || !config.smtpFrom || !config.smtpTo) return;
+
+  const transport = createTransport({
+    host: config.smtpHost,
+    port: Number(config.smtpPort) || 587,
+    secure: Number(config.smtpPort) === 465,
+    ...(config.smtpUser && config.smtpPass ? {
+      auth: { user: config.smtpUser, pass: config.smtpPass },
+    } : {}),
+  });
+
+  await transport.sendMail({
+    from: config.smtpFrom,
+    to: config.smtpTo,
+    subject: `[${payload.severity.toUpperCase()}] ${payload.ruleName}`,
+    text: `${payload.message}\n\nRule: ${payload.ruleName}\nSeverity: ${payload.severity}\nValue: ${payload.value}\nTime: ${payload.timestamp}`,
+  });
 }

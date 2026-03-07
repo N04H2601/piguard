@@ -23,6 +23,12 @@ export class SetupWizard extends LitElement {
   @state() private telegramBotToken = '';
   @state() private telegramChatId = '';
   @state() private webhookUrl = '';
+  @state() private smtpHost = '';
+  @state() private smtpPort = '';
+  @state() private smtpUser = '';
+  @state() private smtpPass = '';
+  @state() private smtpFrom = '';
+  @state() private smtpTo = '';
   @state() private checks: SetupCheck[] = [];
   @state() private loading = false;
   @state() private error = '';
@@ -292,6 +298,12 @@ export class SetupWizard extends LitElement {
             telegramBotToken: this.telegramBotToken.trim(),
             telegramChatId: this.telegramChatId.trim(),
             webhookUrl: this.webhookUrl.trim(),
+            smtpHost: this.smtpHost.trim(),
+            smtpPort: this.smtpPort.trim(),
+            smtpUser: this.smtpUser.trim(),
+            smtpPass: this.smtpPass.trim(),
+            smtpFrom: this.smtpFrom.trim(),
+            smtpTo: this.smtpTo.trim(),
           },
         }),
       });
@@ -381,6 +393,30 @@ export class SetupWizard extends LitElement {
                 <label>
                   Webhook URL
                   <input placeholder="https://hooks.example.com/..." .value=${this.webhookUrl} @input=${(event: Event) => { this.webhookUrl = (event.target as HTMLInputElement).value; }} />
+                </label>
+                <label>
+                  SMTP Host
+                  <input placeholder="smtp.example.com" .value=${this.smtpHost} @input=${(event: Event) => { this.smtpHost = (event.target as HTMLInputElement).value; }} />
+                </label>
+                <label>
+                  SMTP Port
+                  <input placeholder="587" .value=${this.smtpPort} @input=${(event: Event) => { this.smtpPort = (event.target as HTMLInputElement).value; }} />
+                </label>
+                <label>
+                  SMTP User
+                  <input .value=${this.smtpUser} @input=${(event: Event) => { this.smtpUser = (event.target as HTMLInputElement).value; }} />
+                </label>
+                <label>
+                  SMTP Password
+                  <input type="password" .value=${this.smtpPass} @input=${(event: Event) => { this.smtpPass = (event.target as HTMLInputElement).value; }} />
+                </label>
+                <label>
+                  SMTP From
+                  <input placeholder="alerts@example.com" .value=${this.smtpFrom} @input=${(event: Event) => { this.smtpFrom = (event.target as HTMLInputElement).value; }} />
+                </label>
+                <label>
+                  SMTP To
+                  <input placeholder="admin@example.com" .value=${this.smtpTo} @input=${(event: Event) => { this.smtpTo = (event.target as HTMLInputElement).value; }} />
                 </label>
               </div>
             </div>

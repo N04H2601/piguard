@@ -63,6 +63,12 @@ router.get('/notifications', (_req: Request, res: Response) => {
       telegramBotToken: settings.telegramBotToken ? '••••••' : '',
       telegramChatId: settings.telegramChatId,
       webhookUrl: settings.webhookUrl,
+      smtpHost: settings.smtpHost,
+      smtpPort: settings.smtpPort,
+      smtpUser: settings.smtpUser,
+      smtpPass: settings.smtpPass ? '••••••' : '',
+      smtpFrom: settings.smtpFrom,
+      smtpTo: settings.smtpTo,
     },
   });
 });
