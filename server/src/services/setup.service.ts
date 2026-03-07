@@ -1,0 +1,154 @@
+import { getConfig } from '../config.js';
+import { getLogger } from '../logger.js';
+import { healthChecksRepo, settingsRepo } from '../database/repositories.js';
+import { hashPassword } from './auth.service.js';
+
+export interface SetupHealthCheckInput {
+  name: string;
+  type: 'http' | 'tcp' | 'dns' | 'icmp';
+  target: string;
+  interval_s?: number;
+  timeout_ms?: number;
+  expected_status?: number;
+}
+
+export interface SetupInput {
+  username: string;
+  password: string;
+  language: 'fr' | 'en';
+  healthChecks: SetupHealthCheckInput[];
+  notifications?: {
+    ntfyUrl?: string;
+    ntfyTopic?: string;
+    telegramBotToken?: string;
+    telegramChatId?: string;
+    webhookUrl?: string;
+  };
+}
+
+const SETUP_KEY = 'app.setup_complete';
+const LANGUAGE_KEY = 'app.language';
+const ADMIN_USERNAME_KEY = 'auth.admin_username';
+const ADMIN_PASSWORD_HASH_KEY = 'auth.admin_password_hash';
+const ADMIN_SOURCE_KEY = 'auth.source';
+const SETUP_COMPLETED_AT_KEY = 'app.setup_completed_at';
+
+const notificationKeys = {
+  ntfyUrl: 'notify.ntfy_url',
+  ntfyTopic: 'notify.ntfy_topic',
+  telegramBotToken: 'notify.telegram_bot_token',
+  telegramChatId: 'notify.telegram_chat_id',
+  webhookUrl: 'notify.webhook_url',
+} as const;
+
+export function isSetupComplete() {
+  return settingsRepo.get(SETUP_KEY) === '1';
+}
+
+export function getAppLanguage() {
+  return settingsRepo.get(LANGUAGE_KEY, 'fr') === 'en' ? 'en' : 'fr';
+}
+
+export function getAdminSettings() {
+  if (!isSetupComplete()) return null;
+
+  const username = settingsRepo.get(ADMIN_USERNAME_KEY);
+  const passwordHash = settingsRepo.get(ADMIN_PASSWORD_HASH_KEY);
+  if (!username || !passwordHash) return null;
+
+  return {
+    username,
+    passwordHash,
+    source: settingsRepo.get(ADMIN_SOURCE_KEY, 'settings') ?? 'settings',
+  };
+}
+
+export function getSetupStatus() {
+  const admin = getAdminSettings();
+  return {
+    complete: isSetupComplete(),
+    language: getAppLanguage(),
+    hasAdmin: Boolean(admin?.username),
+    source: admin?.source ?? null,
+  };
+}
+
+export async function bootstrapLegacySetupFromEnv() {
+  if (isSetupComplete()) return;
+
+  const config = getConfig();
+  const log = getLogger();
+
+  if (!shouldPromoteEnvCredentials(config.ADMIN_USER, config.ADMIN_PASSWORD)) {
+    return;
+  }
+
+  const passwordHash = await hashPassword(config.ADMIN_PASSWORD);
+  settingsRepo.set(ADMIN_USERNAME_KEY, config.ADMIN_USER);
+  settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, passwordHash);
+  settingsRepo.set(ADMIN_SOURCE_KEY, 'env-bootstrap');
+  settingsRepo.set(LANGUAGE_KEY, 'fr');
+  settingsRepo.set(SETUP_KEY, '1');
+  settingsRepo.set(SETUP_COMPLETED_AT_KEY, new Date().toISOString());
+
+  const notificationPairs: Array<[string, string | undefined]> = [
+    [notificationKeys.ntfyUrl, config.NTFY_URL],
+    [notificationKeys.ntfyTopic, config.NTFY_TOPIC],
+    [notificationKeys.telegramBotToken, config.TELEGRAM_BOT_TOKEN],
+    [notificationKeys.telegramChatId, config.TELEGRAM_CHAT_ID],
+    [notificationKeys.webhookUrl, config.WEBHOOK_URL],
+  ];
+
+  for (const [key, value] of notificationPairs) {
+    if (value) settingsRepo.set(key, value);
+  }
+
+  log.info('Promoted legacy env admin credentials into first-run settings');
+}
+
+export async function completeInitialSetup(input: SetupInput) {
+  const passwordHash = await hashPassword(input.password);
+
+  settingsRepo.set(ADMIN_USERNAME_KEY, input.username.trim());
+  settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, passwordHash);
+  settingsRepo.set(ADMIN_SOURCE_KEY, 'wizard');
+  settingsRepo.set(LANGUAGE_KEY, input.language === 'en' ? 'en' : 'fr');
+  settingsRepo.set(SETUP_KEY, '1');
+  settingsRepo.set(SETUP_COMPLETED_AT_KEY, new Date().toISOString());
+
+  const notifications = input.notifications ?? {};
+  for (const [field, key] of Object.entries(notificationKeys) as Array<[keyof typeof notificationKeys, string]>) {
+    settingsRepo.set(key, (notifications[field] ?? '').trim());
+  }
+
+  healthChecksRepo.replaceAll(
+    input.healthChecks.map((check) => ({
+      name: check.name.trim(),
+      type: check.type,
+      target: check.target.trim(),
+      interval_s: check.interval_s ?? 60,
+      timeout_ms: check.timeout_ms ?? 10000,
+      expected_status: check.expected_status ?? 200,
+      enabled: 1,
+    }))
+  );
+}
+
+export function getNotificationSettings() {
+  const config = getConfig();
+  return {
+    ntfyUrl: settingsRepo.get(notificationKeys.ntfyUrl, config.NTFY_URL ?? ''),
+    ntfyTopic: settingsRepo.get(notificationKeys.ntfyTopic, config.NTFY_TOPIC ?? ''),
+    telegramBotToken: settingsRepo.get(notificationKeys.telegramBotToken, config.TELEGRAM_BOT_TOKEN ?? ''),
+    telegramChatId: settingsRepo.get(notificationKeys.telegramChatId, config.TELEGRAM_CHAT_ID ?? ''),
+    webhookUrl: settingsRepo.get(notificationKeys.webhookUrl, config.WEBHOOK_URL ?? ''),
+  };
+}
+
+function shouldPromoteEnvCredentials(username: string, password: string) {
+  const user = username.trim();
+  const pass = password.trim();
+  if (!user || !pass) return false;
+  if (user === 'admin' && pass === 'changeme') return false;
+  return true;
+}
