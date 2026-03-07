@@ -4,6 +4,7 @@ import { securityRepo } from '../database/repositories.js';
 
 const router = Router();
 
+// API-only: no frontend consumer. Use via API key for security event history.
 router.get('/events', (req: Request, res: Response) => {
   const type = req.query.type as string | undefined;
   const limit = Math.min(parseInt(req.query.limit as string) || 200, 1000);

@@ -23,6 +23,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   SMTP_TO: z.string().optional(),
+  COOKIE_SECURE: z.enum(['true', 'false', 'auto']).default('auto'),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().default('gpt-5.4'),
   DEFAULT_HEALTH_CHECKS: z.string().optional(),
@@ -48,4 +49,12 @@ export function loadConfig(): Config {
 export function getConfig(): Config {
   if (!config) throw new Error('Config not loaded. Call loadConfig() first.');
   return config;
+}
+
+export function isCookieSecure(req?: { protocol?: string }): boolean {
+  const setting = getConfig().COOKIE_SECURE;
+  if (setting === 'true') return true;
+  if (setting === 'false') return false;
+  // auto: detect from request protocol (respects trust proxy / X-Forwarded-Proto)
+  return req?.protocol === 'https';
 }

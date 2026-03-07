@@ -1,6 +1,6 @@
 import helmet from 'helmet';
 import cors from 'cors';
-import { getConfig } from '../config.js';
+import { getConfig, isCookieSecure } from '../config.js';
 import { Request, Response, NextFunction } from 'express';
 import { randomBytes } from 'crypto';
 
@@ -34,8 +34,6 @@ export function securityMiddleware() {
 }
 
 export function ensureCsrfToken(req: Request, res: Response): string {
-  const config = getConfig();
-  const isProduction = config.NODE_ENV === 'production';
   const existing = req.cookies?.piguard_csrf;
 
   if (existing) return existing;
@@ -43,7 +41,7 @@ export function ensureCsrfToken(req: Request, res: Response): string {
   const token = randomBytes(32).toString('hex');
   res.cookie('piguard_csrf', token, {
     httpOnly: false,
-    secure: isProduction,
+    secure: isCookieSecure(req),
     sameSite: 'strict',
     path: '/',
   });
