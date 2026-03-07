@@ -131,7 +131,7 @@ function renderMarkdown(markdown: string): TemplateResult[] {
   return blocks.length ? blocks : [html`<p>${renderInlineMarkdown(markdown)}</p>`];
 }
 
-@customElement('n04h-ai-assistant')
+@customElement('pg-ai-assistant')
 export class AiAssistant extends LitElement {
   @state() private open = false;
   @state() private configured = false;

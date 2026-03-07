@@ -1,7 +1,7 @@
 import { LitElement, html, css, svg } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('n04h-sparkline')
+@customElement('pg-sparkline')
 export class Sparkline extends LitElement {
   @property({ type: Array }) values: number[] = [];
   @property({ type: Number }) width = 240;

@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('n04h-gauge')
+@customElement('pg-gauge')
 export class Gauge extends LitElement {
   @property({ type: Number }) value = 0;
   @property() label = '';

@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { alertsRepo } from '../database/repositories.js';
+import { parseIdParam } from '../lib/params.js';
 
 const router = Router();
 
@@ -23,7 +24,8 @@ router.post('/rules', (req: Request, res: Response) => {
 });
 
 router.put('/rules/:id', (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = parseIdParam(req, res);
+  if (id === null) return;
   const allowed = ['name', 'metric', 'condition', 'threshold', 'duration_s', 'cooldown_s', 'severity', 'enabled', 'channels'];
   const updates: Record<string, any> = {};
   for (const key of allowed) {
@@ -34,7 +36,9 @@ router.put('/rules/:id', (req: Request, res: Response) => {
 });
 
 router.delete('/rules/:id', (req: Request, res: Response) => {
-  alertsRepo.deleteRule(Number(req.params.id));
+  const id = parseIdParam(req, res);
+  if (id === null) return;
+  alertsRepo.deleteRule(id);
   res.json({ success: true });
 });
 
@@ -48,7 +52,9 @@ router.get('/active', (_req: Request, res: Response) => {
 });
 
 router.post('/acknowledge/:id', (req: Request, res: Response) => {
-  alertsRepo.acknowledgeAlert(Number(req.params.id));
+  const id = parseIdParam(req, res);
+  if (id === null) return;
+  alertsRepo.acknowledgeAlert(id);
   res.json({ success: true });
 });
 

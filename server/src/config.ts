@@ -10,7 +10,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3333),
   NODE_ENV: z.enum(['development', 'production']).default('production'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
-  DB_PATH: z.string().default('./data/n04h.db'),
+  DB_PATH: z.string().default('./data/piguard.db'),
   GEOIP_PATH: z.string().default('./data/geoip/GeoLite2-Country.mmdb'),
   NTFY_URL: z.string().optional(),
   NTFY_TOPIC: z.string().optional(),

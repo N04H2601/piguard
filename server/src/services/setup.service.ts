@@ -16,6 +16,7 @@ export interface SetupInput {
   username: string;
   password: string;
   language: 'fr' | 'en';
+  instanceName?: string;
   healthChecks: SetupHealthCheckInput[];
   notifications?: {
     ntfyUrl?: string;
@@ -23,11 +24,18 @@ export interface SetupInput {
     telegramBotToken?: string;
     telegramChatId?: string;
     webhookUrl?: string;
+    smtpHost?: string;
+    smtpPort?: string;
+    smtpUser?: string;
+    smtpPass?: string;
+    smtpFrom?: string;
+    smtpTo?: string;
   };
 }
 
 const SETUP_KEY = 'app.setup_complete';
 const LANGUAGE_KEY = 'app.language';
+const INSTANCE_NAME_KEY = 'app.instance_name';
 const ADMIN_USERNAME_KEY = 'auth.admin_username';
 const ADMIN_PASSWORD_HASH_KEY = 'auth.admin_password_hash';
 const ADMIN_SOURCE_KEY = 'auth.source';
@@ -39,6 +47,12 @@ const notificationKeys = {
   telegramBotToken: 'notify.telegram_bot_token',
   telegramChatId: 'notify.telegram_chat_id',
   webhookUrl: 'notify.webhook_url',
+  smtpHost: 'notify.smtp_host',
+  smtpPort: 'notify.smtp_port',
+  smtpUser: 'notify.smtp_user',
+  smtpPass: 'notify.smtp_pass',
+  smtpFrom: 'notify.smtp_from',
+  smtpTo: 'notify.smtp_to',
 } as const;
 
 export function isSetupComplete() {
@@ -47,6 +61,31 @@ export function isSetupComplete() {
 
 export function getAppLanguage() {
   return settingsRepo.get(LANGUAGE_KEY, 'fr') === 'en' ? 'en' : 'fr';
+}
+
+export function getInstanceName() {
+  return settingsRepo.get(INSTANCE_NAME_KEY, 'PiGuard');
+}
+
+export function setInstanceName(name: string) {
+  settingsRepo.set(INSTANCE_NAME_KEY, name.trim() || 'PiGuard');
+}
+
+export function setAppLanguage(language: string) {
+  settingsRepo.set(LANGUAGE_KEY, language === 'en' ? 'en' : 'fr');
+}
+
+export async function changeAdminPassword(newPassword: string) {
+  const newHash = await hashPassword(newPassword);
+  settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, newHash);
+}
+
+export function updateNotificationSettings(notifications: Record<string, string>) {
+  for (const [field, key] of Object.entries(notificationKeys) as Array<[keyof typeof notificationKeys, string]>) {
+    if (notifications[field] !== undefined) {
+      settingsRepo.set(key, (notifications[field] ?? '').trim());
+    }
+  }
 }
 
 export function getAdminSettings() {
@@ -97,6 +136,12 @@ export async function bootstrapLegacySetupFromEnv() {
     [notificationKeys.telegramBotToken, config.TELEGRAM_BOT_TOKEN],
     [notificationKeys.telegramChatId, config.TELEGRAM_CHAT_ID],
     [notificationKeys.webhookUrl, config.WEBHOOK_URL],
+    [notificationKeys.smtpHost, config.SMTP_HOST],
+    [notificationKeys.smtpPort, config.SMTP_PORT ? String(config.SMTP_PORT) : undefined],
+    [notificationKeys.smtpUser, config.SMTP_USER],
+    [notificationKeys.smtpPass, config.SMTP_PASS],
+    [notificationKeys.smtpFrom, config.SMTP_FROM],
+    [notificationKeys.smtpTo, config.SMTP_TO],
   ];
 
   for (const [key, value] of notificationPairs) {
@@ -113,6 +158,7 @@ export async function completeInitialSetup(input: SetupInput) {
   settingsRepo.set(ADMIN_PASSWORD_HASH_KEY, passwordHash);
   settingsRepo.set(ADMIN_SOURCE_KEY, 'wizard');
   settingsRepo.set(LANGUAGE_KEY, input.language === 'en' ? 'en' : 'fr');
+  settingsRepo.set(INSTANCE_NAME_KEY, (input.instanceName ?? 'PiGuard').trim() || 'PiGuard');
   settingsRepo.set(SETUP_KEY, '1');
   settingsRepo.set(SETUP_COMPLETED_AT_KEY, new Date().toISOString());
 
@@ -142,6 +188,12 @@ export function getNotificationSettings() {
     telegramBotToken: settingsRepo.get(notificationKeys.telegramBotToken, config.TELEGRAM_BOT_TOKEN ?? ''),
     telegramChatId: settingsRepo.get(notificationKeys.telegramChatId, config.TELEGRAM_CHAT_ID ?? ''),
     webhookUrl: settingsRepo.get(notificationKeys.webhookUrl, config.WEBHOOK_URL ?? ''),
+    smtpHost: settingsRepo.get(notificationKeys.smtpHost, config.SMTP_HOST ?? ''),
+    smtpPort: settingsRepo.get(notificationKeys.smtpPort, String(config.SMTP_PORT ?? '')),
+    smtpUser: settingsRepo.get(notificationKeys.smtpUser, config.SMTP_USER ?? ''),
+    smtpPass: settingsRepo.get(notificationKeys.smtpPass, config.SMTP_PASS ?? ''),
+    smtpFrom: settingsRepo.get(notificationKeys.smtpFrom, config.SMTP_FROM ?? ''),
+    smtpTo: settingsRepo.get(notificationKeys.smtpTo, config.SMTP_TO ?? ''),
   };
 }
 

@@ -6,7 +6,7 @@ import '../shared/card.js';
 import '../shared/loading-state.js';
 import '../shared/empty-state.js';
 
-@customElement('n04h-network-panel')
+@customElement('pg-network-panel')
 export class NetworkPanel extends LitElement {
   @state() private interfaces: any[] = [];
   @state() private connections: any[] = [];
@@ -203,7 +203,7 @@ export class NetworkPanel extends LitElement {
       </div>
 
       ${this.error ? html`<div class="error">${this.error}</div>` : ''}
-      ${this.loading ? html`<n04h-loading-state label="Collecting network telemetry"></n04h-loading-state>` : ''}
+      ${this.loading ? html`<pg-loading-state label="Collecting network telemetry"></pg-loading-state>` : ''}
       ${!this.loading ? this.renderCurrentTab() : ''}
     `;
   }
@@ -225,7 +225,7 @@ export class NetworkPanel extends LitElement {
 
   private renderInterfaces() {
     if (this.interfaces.length === 0) {
-      return html`<n04h-empty-state title="No interfaces" detail="Live interface data arrives through the WebSocket stream."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No interfaces" detail="Live interface data arrives through the WebSocket stream."></pg-empty-state>`;
     }
 
     return html`
@@ -250,7 +250,7 @@ export class NetworkPanel extends LitElement {
 
   private renderConnections() {
     if (this.connections.length === 0) {
-      return html`<n04h-empty-state title="No active sockets" detail="The connection table is empty or unavailable in this runtime."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No active sockets" detail="The connection table is empty or unavailable in this runtime."></pg-empty-state>`;
     }
 
     return html`
@@ -275,13 +275,13 @@ export class NetworkPanel extends LitElement {
 
   private renderWireGuard() {
     if (!this.wireguard || Object.keys(this.wireguard).length === 0) {
-      return html`<n04h-empty-state title="WireGuard unavailable" detail="No WireGuard dump could be collected from the mounted environment."></n04h-empty-state>`;
+      return html`<pg-empty-state title="WireGuard unavailable" detail="No WireGuard dump could be collected from the mounted environment."></pg-empty-state>`;
     }
 
     return html`
       <div class="peer-grid">
         ${Object.entries(this.wireguard).map(([name, iface]: [string, any]) => html`
-          <n04h-card cardTitle="Interface: ${name}" icon="⚿">
+          <pg-card cardTitle="Interface: ${name}" icon="⚿">
             <div class="peer-detail">Public Key: ${iface.publicKey}</div>
             <div class="peer-detail">Listen Port: ${iface.listenPort}</div>
             <div style="margin-top: 12px; display: grid; gap: 10px;">
@@ -295,7 +295,7 @@ export class NetworkPanel extends LitElement {
                 </div>
               `)}
             </div>
-          </n04h-card>
+          </pg-card>
         `)}
       </div>
     `;
@@ -303,7 +303,7 @@ export class NetworkPanel extends LitElement {
 
   private renderArp() {
     if (this.arpDevices.length === 0) {
-      return html`<n04h-empty-state title="No ARP devices" detail="The ARP table is empty or inaccessible with the current mounts."></n04h-empty-state>`;
+      return html`<pg-empty-state title="No ARP devices" detail="The ARP table is empty or inaccessible with the current mounts."></pg-empty-state>`;
     }
 
     return html`

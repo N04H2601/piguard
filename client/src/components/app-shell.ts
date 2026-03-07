@@ -32,6 +32,7 @@ export class AppShell extends LitElement {
   @state() private wsConnected = false;
   @state() private activeAlerts = 0;
   @state() private servicesDown = 0;
+  @state() private instanceName = 'PiGuard';
   @state() private authError: string | null = null;
 
   private unsubscribe: (() => void) | null = null;
@@ -207,7 +208,9 @@ export class AppShell extends LitElement {
     this.servicesDown = currentState.servicesDown;
     this.mobileSidebarOpen = currentState.mobileSidebarOpen;
     this.kioskMode = currentState.kioskMode;
+    this.instanceName = currentState.instanceName;
     this.authError = currentState.authError;
+    document.title = this.instanceName || 'PiGuard';
   }
 
   private async checkAuth() {
@@ -225,9 +228,9 @@ export class AppShell extends LitElement {
     }
 
     try {
-      const data = await apiFetch<{ username: string }>('/api/v1/auth/me', { suppressUnauthorized: true });
+      const data = await apiFetch<{ username: string; instanceName?: string }>('/api/v1/auth/me', { suppressUnauthorized: true });
       if (data.username) {
-        setState({ authenticated: true, username: data.username, authError: null });
+        setState({ authenticated: true, username: data.username, instanceName: data.instanceName || 'PiGuard', authError: null });
         connectWs();
         startSummarySync();
       }
@@ -292,19 +295,20 @@ export class AppShell extends LitElement {
     }
 
     if (!this.setupComplete) {
-      return html`<n04h-setup-wizard @setup-success=${() => this.onSetupSuccess()}></n04h-setup-wizard>`;
+      return html`<pg-setup-wizard @setup-success=${() => this.onSetupSuccess()}></pg-setup-wizard>`;
     }
 
     if (!this.authenticated) {
-      return html`<n04h-login .errorMessage=${this.authError ?? ''} @login-success=${() => this.onLoginSuccess()}></n04h-login>`;
+      return html`<pg-login .errorMessage=${this.authError ?? ''} .instanceName=${this.instanceName} @login-success=${() => this.onLoginSuccess()}></pg-login>`;
     }
 
     return html`
       <div class="mobile-backdrop ${this.mobileSidebarOpen ? 'visible' : ''}" @click=${() => setState({ mobileSidebarOpen: false })}></div>
       <div class="app-layout">
         ${!this.kioskMode ? html`
-          <n04h-sidebar
+          <pg-sidebar
             .currentRoute=${this.currentRoute}
+            .instanceName=${this.instanceName}
             ?collapsed=${this.sidebarCollapsed}
             ?mobile-open=${this.mobileSidebarOpen}
             .activeAlerts=${this.activeAlerts}
@@ -313,7 +317,7 @@ export class AppShell extends LitElement {
             @navigate=${this.onNavigate}
             @toggle-sidebar=${this.toggleSidebar}
             @logout=${this.onLogout}
-          ></n04h-sidebar>
+          ></pg-sidebar>
         ` : ''}
 
         <div class="main-content">
@@ -334,32 +338,32 @@ export class AppShell extends LitElement {
         </div>
       </div>
       ${this.kioskMode ? html`<button class="kiosk-exit" @click=${this.toggleKioskMode}>Exit Kiosk</button>` : ''}
-      <n04h-ai-assistant></n04h-ai-assistant>
+      <pg-ai-assistant></pg-ai-assistant>
     `;
   }
 
   private renderPage() {
     switch (this.currentRoute) {
       case 'dashboard':
-        return html`<n04h-overview .data=${this.systemData}></n04h-overview>`;
+        return html`<pg-overview .data=${this.systemData}></pg-overview>`;
       case 'docker':
-        return html`<n04h-docker-panel></n04h-docker-panel>`;
+        return html`<pg-docker-panel></pg-docker-panel>`;
       case 'network':
-        return html`<n04h-network-panel></n04h-network-panel>`;
+        return html`<pg-network-panel></pg-network-panel>`;
       case 'health':
-        return html`<n04h-health-panel></n04h-health-panel>`;
+        return html`<pg-health-panel></pg-health-panel>`;
       case 'security':
-        return html`<n04h-security-panel></n04h-security-panel>`;
+        return html`<pg-security-panel></pg-security-panel>`;
       case 'nginx':
-        return html`<n04h-nginx-panel></n04h-nginx-panel>`;
+        return html`<pg-nginx-panel></pg-nginx-panel>`;
       case 'alerts':
-        return html`<n04h-alerts-panel></n04h-alerts-panel>`;
+        return html`<pg-alerts-panel></pg-alerts-panel>`;
       case 'nodes':
-        return html`<n04h-nodes-panel></n04h-nodes-panel>`;
+        return html`<pg-nodes-panel></pg-nodes-panel>`;
       case 'settings':
-        return html`<n04h-settings-panel></n04h-settings-panel>`;
+        return html`<pg-settings-panel></pg-settings-panel>`;
       default:
-        return html`<n04h-overview .data=${this.systemData}></n04h-overview>`;
+        return html`<pg-overview .data=${this.systemData}></pg-overview>`;
     }
   }
 }

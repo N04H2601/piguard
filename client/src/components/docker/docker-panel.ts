@@ -12,7 +12,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
 
-@customElement('n04h-docker-panel')
+@customElement('pg-docker-panel')
 export class DockerPanel extends LitElement {
   @state() private containers: any[] = [];
   @state() private loading = true;
@@ -220,14 +220,14 @@ export class DockerPanel extends LitElement {
       <div class="page-title">Docker Containers</div>
       ${this.error ? html`<div class="error">${this.error}</div>` : ''}
 
-      ${this.loading ? html`<n04h-loading-state label="Querying Docker engine"></n04h-loading-state>` : html`
+      ${this.loading ? html`<pg-loading-state label="Querying Docker engine"></pg-loading-state>` : html`
         <div class="summary">
           <div class="summary-item"><div class="summary-value" style="color: var(--success)">${running}</div><div class="summary-label">Running</div></div>
           <div class="summary-item"><div class="summary-value" style="color: ${stopped > 0 ? 'var(--danger)' : 'var(--text-muted)'}">${stopped}</div><div class="summary-label">Stopped</div></div>
           <div class="summary-item"><div class="summary-value">${this.containers.length}</div><div class="summary-label">Total</div></div>
         </div>
 
-        ${this.containers.length === 0 ? html`<n04h-empty-state title="No containers" detail="The Docker socket did not return any containers."></n04h-empty-state>` : html`
+        ${this.containers.length === 0 ? html`<pg-empty-state title="No containers" detail="The Docker socket did not return any containers."></pg-empty-state>` : html`
           <div class="containers-grid">
             ${this.containers.map((container) => html`
               <div class="container-card">
