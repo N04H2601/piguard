@@ -81,7 +81,7 @@ export class Overview extends LitElement {
     }
 
     .gauge-row {
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     }
 
     .grid {
@@ -162,6 +162,30 @@ export class Overview extends LitElement {
       min-width: 8px;
       border-radius: 999px 999px 3px 3px;
       transition: height 0.5s ease, background 0.3s;
+    }
+
+    .compact-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 8px 0;
+      flex-wrap: wrap;
+    }
+
+    .compact-stat {
+      display: grid;
+      gap: 8px;
+      justify-items: center;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .compact-divider {
+      width: 1px;
+      height: 60px;
+      background: var(--border);
+      flex-shrink: 0;
     }
 
     .temp-value {
@@ -416,28 +440,28 @@ export class Overview extends LitElement {
         </pg-card>
 
         <pg-card
-          cardTitle="Temperature"
+          cardTitle="Temp / Uptime"
           icon="♨"
           .status=${(temperature?.temp ?? 0) >= 80 ? 'danger' : (temperature?.temp ?? 0) >= 65 ? 'warning' : 'normal'}
         >
-          <div class="gauge-center">
-            ${temperature?.temp !== null ? html`<span class="temp-value" style="color: ${this.getTempColor(temperature.temp)}">${temperature.temp.toFixed(1)}°C</span>` : html`<span class="temp-value" style="color: var(--text-muted)">N/A</span>`}
-            <span class="stat-label">SoC Temperature</span>
-            ${temperature?.throttled ? html`
-              <div class="throttle-flags">
-                <span class="flag ${temperature.throttled.underVoltage ? 'active' : ''}">UV</span>
-                <span class="flag ${temperature.throttled.freqCapped ? 'active' : ''}">FC</span>
-                <span class="flag ${temperature.throttled.throttled ? 'active' : ''}">TH</span>
-                <span class="flag ${temperature.throttled.softTempLimit ? 'active' : ''}">ST</span>
-              </div>
-            ` : ''}
-          </div>
-        </pg-card>
-
-        <pg-card cardTitle="Uptime" icon="⏱">
-          <div class="gauge-center">
-            <span class="stat-value">${formatUptime(uptime?.seconds ?? 0)}</span>
-            <span class="stat-label">System Uptime</span>
+          <div class="compact-stats">
+            <div class="compact-stat">
+              ${temperature?.temp !== null ? html`<span class="temp-value" style="color: ${this.getTempColor(temperature.temp)}">${temperature.temp.toFixed(1)}°C</span>` : html`<span class="temp-value" style="color: var(--text-muted)">N/A</span>`}
+              <span class="stat-label">SoC Temperature</span>
+              ${temperature?.throttled ? html`
+                <div class="throttle-flags">
+                  <span class="flag ${temperature.throttled.underVoltage ? 'active' : ''}">UV</span>
+                  <span class="flag ${temperature.throttled.freqCapped ? 'active' : ''}">FC</span>
+                  <span class="flag ${temperature.throttled.throttled ? 'active' : ''}">TH</span>
+                  <span class="flag ${temperature.throttled.softTempLimit ? 'active' : ''}">ST</span>
+                </div>
+              ` : ''}
+            </div>
+            <div class="compact-divider"></div>
+            <div class="compact-stat">
+              <span class="stat-value">${formatUptime(uptime?.seconds ?? 0)}</span>
+              <span class="stat-label">System Uptime</span>
+            </div>
           </div>
         </pg-card>
         </div>
