@@ -79,6 +79,9 @@ router.put('/notifications', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+const BLOCKED_PREFIXES = ['auth.', 'app.setup'];
+const ALLOWED_PREFIXES = ['ui.', 'display.', 'dashboard.'];
+
 router.put('/:key', (req: Request, res: Response) => {
   const key = req.params.key as string;
   const { value } = req.body ?? {};
@@ -88,6 +91,14 @@ router.put('/:key', (req: Request, res: Response) => {
   }
   if (!/^[a-zA-Z0-9._-]+$/.test(key)) {
     res.status(400).json({ success: false, error: 'Invalid setting key' });
+    return;
+  }
+  if (BLOCKED_PREFIXES.some((p) => key.startsWith(p))) {
+    res.status(403).json({ success: false, error: 'This setting cannot be modified via this endpoint' });
+    return;
+  }
+  if (!ALLOWED_PREFIXES.some((p) => key.startsWith(p))) {
+    res.status(403).json({ success: false, error: 'Setting key not in allowed namespace' });
     return;
   }
   settingsRepo.set(key, typeof value === 'string' ? value : JSON.stringify(value));
