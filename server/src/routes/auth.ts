@@ -5,6 +5,7 @@ import { loginLimiter } from '../middleware/rate-limit.js';
 import { getLogger } from '../logger.js';
 import { ensureCsrfToken } from '../middleware/security.js';
 import { completeInitialSetup, getSetupStatus, isSetupComplete, getInstanceName } from '../services/setup.service.js';
+import { parseIdParam } from '../lib/params.js';
 
 const router = Router();
 
@@ -158,7 +159,9 @@ router.get('/api-keys', (_req: Request, res: Response) => {
 });
 
 router.delete('/api-keys/:id', (req: Request, res: Response) => {
-  apiKeysRepo.delete(Number(req.params.id));
+  const id = parseIdParam(req, res);
+  if (id === null) return;
+  apiKeysRepo.delete(id);
   res.json({ success: true });
 });
 

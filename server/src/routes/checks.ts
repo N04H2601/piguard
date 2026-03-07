@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { healthChecksRepo } from '../database/repositories.js';
+import { parseIdParam } from '../lib/params.js';
 
 const router = Router();
 
@@ -24,7 +25,8 @@ router.post('/', (req: Request, res: Response) => {
 });
 
 router.put('/:id', (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = parseIdParam(req, res);
+  if (id === null) return;
   const allowed = ['name', 'type', 'target', 'interval_s', 'timeout_ms', 'expected_status', 'enabled'];
   const updates: Record<string, any> = {};
   for (const key of allowed) {
@@ -39,18 +41,23 @@ router.put('/:id', (req: Request, res: Response) => {
 });
 
 router.delete('/:id', (req: Request, res: Response) => {
-  healthChecksRepo.delete(Number(req.params.id));
+  const id = parseIdParam(req, res);
+  if (id === null) return;
+  healthChecksRepo.delete(id);
   res.json({ success: true });
 });
 
 router.get('/:id/results', (req: Request, res: Response) => {
+  const id = parseIdParam(req, res);
+  if (id === null) return;
   const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
-  const results = healthChecksRepo.getResults(Number(req.params.id), limit);
+  const results = healthChecksRepo.getResults(id, limit);
   res.json({ success: true, data: results });
 });
 
 router.get('/:id/uptime', (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+  const id = parseIdParam(req, res);
+  if (id === null) return;
   const day = 86400000;
   res.json({
     success: true,
