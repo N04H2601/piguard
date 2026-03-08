@@ -1,0 +1,15 @@
+services:
+  piguard:
+    user: "0:0"
+    pid: host
+    cap_add:
+      - NET_RAW
+    cap_drop:
+      - ALL
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/log:/host/root/var/log:ro
+      - /etc/ssh:/host/root/etc/ssh:ro
+      - /etc/apt/apt.conf.d:/host/root/etc/apt/apt.conf.d:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
