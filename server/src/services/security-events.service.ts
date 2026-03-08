@@ -118,12 +118,6 @@ function buildSecurityNotification(event: ParsedAuthEvent) {
         severity: 'warning',
         message: `SSH login attempt for invalid user${user}${source}.`,
       };
-    case 'sudo':
-      return {
-        ruleName: 'Sudo Command',
-        severity: 'info',
-        message: `sudo executed${user}: ${event.details}`,
-      };
     default:
       return null;
   }

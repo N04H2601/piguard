@@ -1,15 +1,20 @@
 services:
   piguard:
     user: "0:0"
+    network_mode: host
     pid: host
     cap_add:
       - NET_RAW
+      - NET_ADMIN
     cap_drop:
       - ALL
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /var/log:/host/root/var/log:ro
+      - /var/log/journal:/host/root/var/log/journal:ro
+      - /run/log/journal:/host/root/run/log/journal:ro
       - /etc/ssh:/host/root/etc/ssh:ro
       - /etc/apt/apt.conf.d:/host/root/etc/apt/apt.conf.d:ro
+      - /etc/letsencrypt:/host/root/etc/letsencrypt:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
