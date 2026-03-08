@@ -21,6 +21,8 @@
 
 ## About
 
+PiGuard delivers real-time system metrics, Docker visibility, health checks, security auditing, alerting, reverse-proxy analytics, and an optional AI assistant — all from a clean, themeable web dashboard.
+
 Most monitoring stacks are too heavy, too generic, or too painful to bootstrap on a Pi. PiGuard takes a different approach:
 
 1. Start the stack
